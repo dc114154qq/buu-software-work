@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游览路线规划 - AI升级版</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=iiS8DXGXwqzQr82HSDdIpX7YmcEf4zZu"></script>
+
+    <style>
+        /* 地图容器样式 */
+        #allmap {
+            width: 100%;
+            height: 400px; /* 地图高度 */
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* 隐藏百度地图左下角的版权遮挡，保持界面整洁 */
+        .BMap_cpyCtrl, .anchorBL { display: none; } 
+
+        /* AI 输入框样式 */
+        .ai-input-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+            border: 1px solid #ffcccc;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 12px; height: 12px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 5px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <header><h1>路线规划</h1></header>
+
+    <div class="container">
+        
+        <div class="card ai-input-card" style="padding: 15px; margin-bottom: 15px;">
+            <h3 style="margin-top:0; color:var(--primary-color)">🤖 AI 智能定制</h3>
+            <textarea id="ai-prompt" class="search-box" style="height: 80px; resize: none; margin-bottom:10px;" placeholder="请输入您的需求，例如：&#10;“带父母玩，想吃烤鸭，不要太累”&#10;“特种兵一日游，想去天安门和博物馆”"></textarea>
+            <button id="ai-btn" onclick="generateAIRoute()" style="width: 100%; background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display:flex; justify-content:center; align-items:center;">
+                ✨ 生成我的专属路线
+            </button>
+            <div id="ai-error" style="color:red; font-size:0.8rem; margin-top:5px; display:none;"></div>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchRoute('elder')">👴 银发休闲</button>
+            <button class="tab-btn" onclick="switchRoute('youth')">📸 青年打卡</button>
+            <button class="tab-btn" onclick="switchRoute('kids')">👶 亲子研学</button>
+            <button class="tab-btn" onclick="switchRoute('quick')">⚡ 极速精华</button>
+            <button class="tab-btn" onclick="switchRoute('immersive')">🍵 深度沉浸</button>
+            <button class="tab-btn" id="ai-tab-btn" onclick="switchRoute('ai-custom')" style="display:none;">🤖 专属定制</button>
+        </div>
+
+        <div id="allmap"></div>
+
+        <div id="route-intro" class="route-desc-card">正在规划路线数据...</div>
+
+        <div class="card" style="display:block; padding:20px;">
+            <ul class="timeline" id="route-container"></ul>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
+        <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="route.html" class="nav-item active"><span class="nav-icon">🗺️</span>路线</a>
+    </nav>
+
+    <script>
+        // 全局变量
+        let map = null;
+        let allItemsMap = {}; // 数据字典：{ "poi-id": {data...} }
+        let rawDataList = []; // 用于发送给AI的原始数据列表
+
+        // --- 1. 路线策略配置 ---
+        const routeStrategies = {
+            'elder': {
+                desc: "少走回头路，体验老字号与经典地标，全程平缓，适合长辈。",
+                path: [
+                    { id: "stay-hotel-005", time: "09:30", action: "出发", note: "入住汉庭酒店(前门大街店)，位置便利" },
+                    { id: "poi-restaurant-001", time: "11:30", action: "午餐", note: "百年前门铜锅涮肉，口味正宗软烂" },
+                    { id: "poi-scenic-002", time: "14:00", action: "游览", note: "天安门广场，瞻仰雄伟建筑" },
+                    { id: "poi-restaurant-003", time: "17:30", action: "晚餐", note: "全聚德烤鸭，品尝国宴级美食" }
+                ]
+            },
+            'youth': {
+                desc: "特种兵打卡路线！集合网红机位与潮流地标，非常出片。",
+                path: [
+                    { id: "stay-hotel-008", time: "08:00", action: "出发", note: "从桔子酒店出发，环境时尚" },
+                    { id: "poi-scenic-002", time: "09:00", action: "拍照", note: "天安门广场拍摄日出/升旗氛围" },
+                    { id: "poi-restaurant-002", time: "11:30", action: "午餐", note: "四季民福烤鸭，绝美景观位打卡" },
+                    { id: "poi-scenic-003", time: "14:30", action: "看展", note: "国家博物馆，拍摄历史文物大片" }
+                ]
+            },
+            'kids': {
+                desc: "寓教于乐，空间开阔，包含博物馆与公园，安全且有趣。",
+                path: [
+                    { id: "stay-hotel-006", time: "09:00", action: "出发", note: "全季酒店(天坛店)出发" },
+                    { id: "poi-scenic-001", time: "09:30", action: "游玩", note: "天坛公园，体验回音壁的奇妙" },
+                    { id: "poi-scenic-003", time: "13:30", action: "研学", note: "国家博物馆，了解古代中国历史" },
+                    { id: "poi-restaurant-003", time: "17:00", action: "晚餐", note: "全聚德，看片鸭师傅现场表演" }
+                ]
+            },
+            'quick': {
+                desc: "2-3小时游览前门核心精华，不走冤枉路，适合时间紧迫的游客。",
+                path: [
+                    { id: "stay-hotel-007", time: "10:00", action: "出发", note: "7天优品(天安门广场店)出发" },
+                    { id: "poi-scenic-002", time: "10:30", action: "打卡", note: "天安门金水桥留影" },
+                    { id: "poi-restaurant-002", time: "12:00", action: "快吃", note: "四季民福(大栅栏店)品尝烤鸭" }
+                ]
+            },
+            'immersive': {
+                desc: "住在胡同里，吃在胡同里，深度感受老北京的慢生活。",
+                path: [
+                    { id: "stay-hotel-001", time: "10:00", action: "醒来", note: "青云阁酒店，感受百年历史建筑" },
+                    { id: "poi-restaurant-001", time: "12:00", action: "午餐", note: "百年前门铜锅涮肉，地道烟火气" },
+                    { id: "poi-scenic-002", time: "15:00", action: "散步", note: "步行至天安门，感受中轴线魅力" }
+                ]
+            }
+        };
+
+        // --- 2. 程序初始化 ---
+        async function init() {
+            try {
+                const response = await fetch('./data.json');
+                const data = await response.json();
+
+                // 建立索引 & 准备AI数据列表
+                rawDataList = [...(data.pois || []), ...(data.stays || [])];
+                rawDataList.forEach(item => {
+                    allItemsMap[item.id] = item;
+                });
+
+                initMap();
+                switchRoute('elder');
+
+            } catch (error) {
+                console.error("初始化失败:", error);
+                document.getElementById('route-intro').innerHTML = "⚠️ 数据加载失败。";
+            }
+        }
+
+        // --- 3. 初始化地图实例 ---
+        function initMap() {
+            map = new BMapGL.Map("allmap");
+            const center = new BMapGL.Point(116.399, 39.900);
+            map.centerAndZoom(center, 15);
+            map.enableScrollWheelZoom(true);
+        }
+
+        // --- 4. 切换路线主逻辑 ---
+        function switchRoute(type) {
+            // UI Tab 高亮处理
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            let btnIndex = ['elder', 'youth', 'kids', 'quick', 'immersive'].indexOf(type);
+            if(btnIndex !== -1) {
+                document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
+            } else if (type === 'ai-custom') {
+                const aiBtn = document.getElementById('ai-tab-btn');
+                aiBtn.style.display = 'inline-block';
+                aiBtn.classList.add('active');
+            }
+
+            const strategy = routeStrategies[type];
+            if (!strategy) return;
+
+            // 渲染描述与内容
+            document.getElementById('route-intro').innerHTML = `<strong>💡 路线特色：</strong>${strategy.desc}`;
+            const timelineContainer = document.getElementById('route-container');
+            timelineContainer.innerHTML = '';
+            map.clearOverlays(); 
+
+            const validPoints = [];
+            strategy.path.forEach((step, index) => {
+                const item = allItemsMap[step.id];
+                if (!item) return;
+
+                const address = item.location ? item.location.address : item.address;
+                timelineContainer.innerHTML += `
+                    <li class="timeline-item">
+                        <div style="font-weight:bold; color:var(--primary-color)">${step.time}</div>
+                        <strong>${step.action}：${item.name}</strong>
+                        <div style="font-size:0.85rem; color:#666; margin-top:4px;">${step.note}</div>
+                        <div style="font-size:0.75rem; color:#999; margin-top:2px;">📍 ${address}</div>
+                    </li>
+                `;
+
+                if (item.location && item.location.lng) {
+                    const pt = new BMapGL.Point(item.location.lng, item.location.lat);
+                    validPoints.push(pt);
+
+                    const marker = new BMapGL.Marker(pt);
+                    map.addOverlay(marker);
+
+                    let labelTxt = (index + 1).toString();
+                    if (index === 0) labelTxt = "起";
+                    if (index === strategy.path.length - 1) labelTxt = "终";
+
+                    const label = new BMapGL.Label(labelTxt, {
+                        position: pt,
+                        offset: new BMapGL.Size(-8, -25)
+                    });
+                    label.setStyle({
+                        color: "#fff", backgroundColor: "#d63031", border: "none",
+                        borderRadius: "50%", padding: "2px 6px", fontSize: "12px",
+                        fontWeight: "bold", fontFamily: "Arial"
+                    });
+                    map.addOverlay(label);
+
+                    const infoWindow = new BMapGL.InfoWindow(
+                        `<b>${item.name}</b><br><span style="font-size:12px;color:#666">${address}</span>`, 
+                        { width: 220, height: 70, title: step.action }
+                    );
+                    marker.addEventListener("click", () => map.openInfoWindow(infoWindow, pt));
+                }
+            });
+
+            if (validPoints.length > 1) {
+                renderWalkingRoute(validPoints);
+            }
+        }
+
+        // --- 5. 渲染步行导航 ---
+        function renderWalkingRoute(points) {
+            for (let i = 0; i < points.length - 1; i++) {
+                const start = points[i];
+                const end = points[i+1];
+                const walking = new BMapGL.WalkingRoute(map, {
+                    renderOptions: { map: map, autoViewport: false, enableDragging: false }
+                });
+                walking.search(start, end);
+            }
+            setTimeout(() => { map.setViewport(points); }, 500);
+        }
+
+        // --- 6. 新增：调用 AI 生成路线 ---
+        async function generateAIRoute() {
+            const prompt = document.getElementById('ai-prompt').value.trim();
+            const errorDiv = document.getElementById('ai-error');
+            const btn = document.getElementById('ai-btn');
+            
+            if(!prompt) {
+                alert("请先输入您的需求~");
+                return;
+            }
+
+            // UI Loading 状态
+            errorDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> 正在思考中...';
+
+            try {
+                // 1. 构造上下文：告诉 AI 我们有哪些地点 (精简信息以节省Token)
+                const availablePois = rawDataList.map(i => ({
+                    id: i.id,
+                    name: i.name,
+                    type: i.category || i.starOrLevel,
+                    rating: i.rating
+                }));
+
+                // 2. 构造 System Prompt
+                const systemPrompt = `你是一个专业的北京导游。请根据用户需求，从以下可选地点中规划一条游览路线。
+                可选地点数据：${JSON.stringify(availablePois)}
+                
+                要求：
+                1. 必须只使用“可选地点数据”中的 id。
+                2. 返回格式必须是严格的 JSON，不要包含 Markdown 格式（如 \`\`\`json ）。
+                3. JSON 格式如下：
+                {
+                    "desc": "一句话概括路线特色",
+                    "path": [
+                        { "id": "对应地点的id", "time": "HH:MM", "action": "动作(如:出发/游玩/午餐)", "note": "推荐理由" }
+                    ]
+                }`;
+
+                // 3. 发起请求
+                const response = await fetch("https://ark.cn-beijing.volces.com/api/v3/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        // 注意：在前端直接暴露 Key 有安全风险，生产环境请通过后端转发
+                        "Authorization": "Bearer 5130f665-07ee-41bb-97ff-c0c615dff8c0"
+                    },
+                    body: JSON.stringify({
+                        "model": "doubao-seed-1-6-251015", // 使用你提供的模型
+                        "max_completion_tokens": 4096,
+                        "messages": [
+                            { "role": "system", "content": systemPrompt },
+                            { "role": "user", "content": prompt }
+                        ]
+                    })
+                });
+
+                if(!response.ok) throw new Error("API 请求失败");
+                const resJson = await response.json();
+                
+                // 4. 解析 AI 返回的内容
+                let aiContent = resJson.choices[0].message.content;
+                // 清理可能的 Markdown 标记
+                aiContent = aiContent.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                const routeData = JSON.parse(aiContent);
+
+                // 5. 存入策略并渲染
+                routeStrategies['ai-custom'] = routeData;
+                switchRoute('ai-custom');
+
+            } catch (err) {
+                console.error(err);
+                errorDiv.innerText = "生成失败，请稍后重试或检查网络";
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✨ 生成我的专属路线';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

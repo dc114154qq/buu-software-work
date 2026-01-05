@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胡同导览 - 首页</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header><h1>胡同导览</h1></header>
+
+    <div class="container">
+        <div class="card" style="display:block; padding:20px; text-align:center;">
+            <h2 id="hutong-name" style="color:#d63031; margin-bottom:10px;">加载中...</h2>
+            <p style="color:#636e72; font-size:0.9rem; text-align:left; line-height:1.6;">
+                这里是连接大栅栏和琉璃厂的文化纽带。既保留了老北京的市井气息，又融合了书局历史与现代创意设计。
+            </p>
+        </div>
+
+        <h3>🔥 热门推荐</h3>
+        <div id="recommend-list"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span>首页</a>
+        <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
+        <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
+    </nav>
+
+    <script>
+        fetch('./data.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('hutong-name').innerText = data.hutong.name;
+                
+                // 推荐算法：选评分最高的1个景点和1个酒店
+                const bestPoi = data.pois.sort((a,b) => b.rating - a.rating)[0];
+                const bestStay = data.stays.sort((a,b) => b.rating - a.rating)[0];
+                const list = [bestPoi, bestStay];
+
+                const container = document.getElementById('recommend-list');
+                list.forEach(item => {
+        if(!item) return;
+        const isStay = item.type === '住宿';
+        const price = isStay ? 
+            (item.roomOffers?.[0]?.priceCNY || '-') : item.avgPricePerPersonCNY;
+        
+        // 图片处理
+        let imgSrc = '';
+        if (item.media && item.media.cover) {
+            imgSrc = item.media.cover;
+        }
+
+        const fallbackText = isStay ? '推荐住宿' : '推荐必去';
+
+        // --- 修改开始 ---
+        container.innerHTML += `
+            <a href="detail.html?id=${item.id}" class="card">
+                <div class="card-left">
+                    <span class="img-fallback-text">${fallbackText}</span>
+                    
+                    <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
+                    
+                    <span style="position:absolute; top:0; left:0; background:var(--primary-color); color:white; font-size:0.8rem; padding:3px 8px; border-bottom-right-radius:8px; z-index:10; box-shadow:1px 1px 3px rgba(0,0,0,0.3);">
+                        ${fallbackText}
+                    </span>
+                </div>
+                <div class="card-content">
+                    <h4 class="card-title">${item.name}</h4>
+                    <div class="card-info">★ ${item.rating} | ¥${price}起</div>
+                </div>
+            </a>`;
+        // --- 修改结束 ---
+    });
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景点美食列表</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header><h1>景点美食</h1></header>
+
+    <div class="container">
+        <input type="text" class="search-box" placeholder="搜索餐厅、景点..." id="search-input">
+        <div id="list-container"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="pois.html" class="nav-item active"><span class="nav-icon">🍜</span>景点美食</a>
+        <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
+    </nav>
+
+    <script>
+        let allPois = [];
+        const container = document.getElementById('list-container');
+
+        // --- 渲染函数 ---
+        function render(list) {
+            container.innerHTML = '';
+            if(list.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999">暂无相关数据</div>';
+                return;
+            }
+
+            list.forEach(item => {
+                const address = item.location ? item.location.address : '地址未知';
+                const price = item.avgPricePerPersonCNY ? `¥${item.avgPricePerPersonCNY}/人` : '¥-';
+                
+                // 修改：直接使用本地图片路径
+                // data.json 中的路径通常为 assets/img/...
+                let imgSrc = '';
+                if (item.media && item.media.cover) {
+                    imgSrc = item.media.cover; 
+                }
+
+                container.innerHTML += `
+                    <a href="detail.html?id=${item.id}" class="card">
+                        <div class="card-left">
+                            <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h4 class="card-title">${item.name}</h4>
+                                <div class="card-info">★ ${item.rating} <span class="tag">${item.category}</span></div>
+                                <div class="card-info">📍 ${address}</div>
+                            </div>
+                            <div class="price">${price}</div>
+                        </div>
+                    </a>`;
+            });
+        }
+
+        // --- 加载数据 ---
+        fetch('./data.json')
+            .then(res => res.json())
+            .then(data => {
+                allPois = data.pois || [];
+                render(allPois);
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = "<p style='text-align:center;margin-top:20px'>数据加载失败，请确保使用 http.server 运行</p>";
+            });
+
+        // 搜索功能
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allPois.filter(i => i.name.includes(val) || i.category.includes(val));
+            render(filtered);
+        });
+    </script>
+</body>
+</html>

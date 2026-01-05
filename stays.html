@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒店住宿</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header><h1>酒店住宿</h1></header>
+
+    <div class="container">
+        <input type="text" class="search-box" placeholder="搜索酒店..." id="search-input">
+        <div id="list-container"></div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
+        <a href="stays.html" class="nav-item active"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
+    </nav>
+
+    <script>
+        let allStays = [];
+        const container = document.getElementById('list-container');
+
+        function render(list) {
+            container.innerHTML = '';
+            list.forEach(item => {
+                const address = item.location ? item.location.address : '地址未知';
+                // 计算最低价
+                let minPrice = item.roomOffers?.[0]?.priceCNY || 0;
+                if(item.roomOffers) {
+                    minPrice = Math.min(...item.roomOffers.map(r => r.priceCNY));
+                }
+
+                // 图片处理
+                let imgSrc = '';
+                if (item.media && item.media.cover) {
+                    imgSrc = item.media.cover;
+                }
+                
+                container.innerHTML += `
+                    <a href="detail.html?id=${item.id}" class="card">
+                        <div class="card-left">
+                            <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
+                        </div>
+                        <div class="card-content">
+                            <div>
+                                <h4 class="card-title">${item.name}</h4>
+                                <div class="card-info">★ ${item.rating} <span class="tag">${item.starOrLevel}</span></div>
+                                <div class="card-info">📍 ${address}</div>
+                            </div>
+                            <div class="price" style="text-align:right">¥${minPrice}起</div>
+                        </div>
+                    </a>`;
+            });
+        }
+
+        fetch('./data.json').then(res => res.json()).then(data => {
+            allStays = data.stays;
+            render(allStays);
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allStays.filter(i => i.name.includes(val) || i.location.address.includes(val));
+            render(filtered);
+        });
+    </script>
+</body>
+</html>

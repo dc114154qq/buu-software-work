@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详情 - 杨梅竹斜街</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="detail-header">
+        <img id="d-img" class="detail-img" src="" alt="景点图片" onclick="openModal()" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image';this.style.cursor='default';">
+        <div id="d-cover-text" style="position:absolute; bottom:10px; left:15px; color:white; font-size:1.5rem; text-shadow:0 2px 4px rgba(0,0,0,0.5); pointer-events:none;"></div>
+    </div>
+    
+    <div class="detail-body">
+        <a href="javascript:history.back()" style="color:var(--primary-color); font-weight:bold; display:block; margin-bottom:15px; text-decoration:none;">
+            ← 返回上一页
+        </a>
+        
+        <h2 id="d-name" style="margin-top:0;"></h2>
+        <div style="margin-bottom:15px;">
+            <span class="tag" id="d-type"></span>
+            <span style="color:#ff9f43; font-weight:bold; margin-left:10px;" id="d-rating"></span>
+            <span style="color:#636e72; font-size:0.9rem; margin-left:10px;" id="d-price"></span>
+        </div>
+        
+        <p id="d-address" style="color:#666; border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px; display:flex; align-items:center;">
+            📍 <span style="margin-left:5px">加载中...</span>
+        </p>
+        
+        <h4>💰 优惠信息</h4>
+        <div id="d-offers" style="margin-bottom:20px;"></div>
+
+        <h4>📝 简介 / 设施</h4>
+        <div id="d-desc" style="color:#555; font-size:0.9rem; line-height:1.6;"></div>
+    </div>
+
+    <div id="imgModal" class="modal" onclick="closeModal()">
+        <span class="close-btn">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <script>
+        // 获取URL参数
+        const params = new URLSearchParams(window.location.search);
+        const targetId = params.get('id');
+
+        fetch('./data.json').then(res => res.json()).then(data => {
+            const allItems = [...(data.pois||[]), ...(data.stays||[])];
+            const item = allItems.find(i => i.id === targetId);
+
+            if(!item) {
+                document.body.innerHTML = "<div style='padding:20px;text-align:center'>⚠️ 未找到该项目信息</div>";
+                return;
+            }
+
+            // 1. 基础信息渲染 [cite: 194]
+            document.getElementById('d-name').innerText = item.name;
+            document.getElementById('d-cover-text').innerText = item.name;
+            document.getElementById('d-type').innerText = item.category || item.starOrLevel || '其它';
+            document.getElementById('d-rating').innerText = item.rating ? `★ ${item.rating}` : '暂无评分';
+            
+            // 2. 图片处理与错误交互 [cite: 193, 195]
+            const imgEl = document.getElementById('d-img');
+            if (item.media && item.media.cover) {
+                imgEl.src = item.media.cover; 
+            } else {
+                // 如果没有图片字段，使用默认占位图
+                imgEl.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                imgEl.onclick = null; // 禁用点击
+                imgEl.style.cursor = 'default';
+            }
+
+            // 3. 价格与地址
+            let price = item.avgPricePerPersonCNY;
+            if(!price && item.roomOffers && item.roomOffers.length) price = item.roomOffers[0].priceCNY;
+            document.getElementById('d-price').innerText = price ? `¥${price}起` : '';
+            
+            const address = item.location ? item.location.address : (item.address || '地址未知');
+            document.getElementById('d-address').innerHTML = `📍 <span style="margin-left:5px">${address}</span>`;
+
+            // 4. 优惠列表渲染
+            const offersDiv = document.getElementById('d-offers');
+            let html = '';
+            if(item.deals && item.deals.length) {
+                item.deals.forEach(d => {
+                    html += `<div class="deal-item">🏷️ ${d.title || d} <span class="price" style="float:right">${d.priceCNY ? '¥'+d.priceCNY : ''}</span></div>`;
+                });
+            } else if (item.roomOffers) {
+                item.roomOffers.forEach(r => {
+                    html += `<div class="deal-item">🛏️ <b>${r.roomName}</b> <br><span style="color:#999;font-size:0.8rem">${r.breakfast||''} ${r.cancelPolicy||''}</span> <span class="price" style="float:right">¥${r.priceCNY}</span></div>`;
+                });
+            } else {
+                html = "<div style='color:#999; padding:10px 0;'>暂无特定优惠</div>";
+            }
+            offersDiv.innerHTML = html;
+
+            // 5. 描述渲染
+            const descDiv = document.getElementById('d-desc');
+            if(item.amenities) descDiv.innerHTML = "✅ <b>设施服务：</b> " + item.amenities.join(' · ');
+            else if (item.keywords) descDiv.innerHTML = "🏷️ <b>关键词：</b> " + item.keywords.join('、');
+            else descDiv.innerText = "暂无详细描述";
+        });
+
+        // 交互逻辑：模态框开关
+        function openModal() {
+            const src = document.getElementById('d-img').src;
+            // 防止点击占位图也放大
+            if(src.includes('placeholder.com')) return; 
+            
+            const modal = document.getElementById('imgModal');
+            const modalImg = document.getElementById("img01");
+            modal.style.display = "block";
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imgModal').style.display = "none";
+        }
+    </script>
+</body>
+</html>
