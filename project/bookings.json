@@ -1,0 +1,41 @@
+[
+  {
+    "parkId": "poi-park-001",
+    "plate": "京A12345",
+    "startTime": "2024-05-20T10:00"
+  },
+  {
+    "parkId": "poi-park-001",
+    "plate": "京C67890",
+    "startTime": "2024-05-20T12:30"
+  },
+  {
+    "parkId": "poi-park-004",
+    "plate": "津E55555",
+    "startTime": "2024-05-21T09:00"
+  },
+  {
+    "parkId": "poi-park-001",
+    "plate": "京N12345",
+    "startTime": "2026-01-06T08:24",
+    "timestamp": 1767659093981
+  },
+  {
+    "parkId": "poi-park-003",
+    "plate": "京N12345",
+    "startTime": "2026-01-06T08:33",
+    "timestamp": 1767659631933
+  },
+  {
+    "parkId": "poi-park-002",
+    "plate": "京PC9H23",
+    "startTime": "2026-01-06T09:10",
+    "timestamp": 1767661812179
+  },
+  {
+    "parkId": "poi-park-001",
+    "plate": "京PC9H23",
+    "startTime": "2026-01-06T10:16",
+    "timestamp": 1767665820106
+  }
+]
