@@ -5,15 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>胡同导览 - 首页</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 全局样式统一 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #d63031;
+            --secondary-color: #ff9f43;
+            --light-gray: #f5f5f5;
+            --mid-gray: #e0e0e0;
+            --dark-gray: #636e72;
+            --radius: 10px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: "Microsoft Yahei", sans-serif;
+            color: #333;
+            line-height: 1.7;
+            background-color: #f9f9f9;
+            padding-bottom: 70px;
+        }
+        a { text-decoration: none; color: inherit; }
+        
+        /* 顶部导航 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 16px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 首页特有：Banner 样式 */
+        .hutong-banner {
+            width: 100%;
+            height: 200px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            background-color: var(--mid-gray);
+        }
+        .hutong-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .banner-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+            font-family: "华文行楷", serif;
+        }
+
+        /* 简介卡片 */
+        .intro-card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            margin: 20px 0 10px;
+            padding-left: 5px;
+            border-left: 4px solid var(--primary-color);
+            line-height: 1;
+            font-size: 1.1rem;
+        }
+
+        /* 通用卡片样式 (复用 pois.html) */
+        .card {
+            display: flex;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card-left {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            flex-shrink: 0;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-gray);
+            font-size: 0.8rem;
+            overflow: hidden;
+        }
+        .thumb-img {
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .card-content {
+            padding: 12px 15px;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-info {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+        .price {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1rem;
+            align-self: flex-start;
+            padding-left: 10px;
+            white-space: nowrap;
+        }
+        /* 推荐角标 */
+        .recommend-badge {
+            position: absolute;
+            top: 0; left: 0;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-bottom-right-radius: 8px;
+            z-index: 10;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+    </style>
 </head>
 <body>
     <header><h1>胡同导览</h1></header>
 
     <div class="container">
-        <div class="card" style="display:block; padding:20px; text-align:center;">
-            <h2 id="hutong-name" style="color:#d63031; margin-bottom:10px;">加载中...</h2>
-            <p style="color:#636e72; font-size:0.9rem; text-align:left; line-height:1.6;">
-                这里是连接大栅栏和琉璃厂的文化纽带。既保留了老北京的市井气息，又融合了书局历史与现代创意设计。
+        <div class="hutong-banner">
+            <img src="assets/img/hutong-ymz/banner.jpg" alt="杨梅竹斜街景色" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="banner-placeholder" style="display: none;">杨梅竹斜街</div>
+        </div>
+
+        <div class="intro-card">
+            <h2 id="hutong-name" style="color:var(--primary-color); margin-bottom:10px;">加载中...</h2>
+            <p style="color:var(--dark-gray); font-size:0.95rem; text-align:left; line-height:1.8;">
+                这里是连接大栅栏和琉璃厂的文化纽带。既保留了老北京的市井气息，又融合了书局历史与现代创意设计，是漫步、拍照、品味老北京生活的绝佳去处。
             </p>
         </div>
 
@@ -25,6 +199,7 @@
         <a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span>首页</a>
         <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
         <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="parks.html" class="nav-item"><span class="nav-icon">🅿️</span>停车场</a>
         <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
     </nav>
 
@@ -32,47 +207,60 @@
         fetch('./data.json')
             .then(res => res.json())
             .then(data => {
-                document.getElementById('hutong-name').innerText = data.hutong.name;
+                // 1. 设置胡同名称
+                if(data.hutong && data.hutong.name) {
+                    document.getElementById('hutong-name').innerText = data.hutong.name;
+                }
                 
-                // 推荐算法：选评分最高的1个景点和1个酒店
-                const bestPoi = data.pois.sort((a,b) => b.rating - a.rating)[0];
-                const bestStay = data.stays.sort((a,b) => b.rating - a.rating)[0];
+                // 2. 推荐算法：选评分最高的1个景点和1个酒店
+                const bestPoi = (data.pois || []).sort((a,b) => b.rating - a.rating)[0];
+                const bestStay = (data.stays || []).sort((a,b) => b.rating - a.rating)[0];
                 const list = [bestPoi, bestStay];
 
                 const container = document.getElementById('recommend-list');
+                container.innerHTML = ''; // 清空
+
                 list.forEach(item => {
-        if(!item) return;
-        const isStay = item.type === '住宿';
-        const price = isStay ? 
-            (item.roomOffers?.[0]?.priceCNY || '-') : item.avgPricePerPersonCNY;
-        
-        // 图片处理
-        let imgSrc = '';
-        if (item.media && item.media.cover) {
-            imgSrc = item.media.cover;
-        }
-
-        const fallbackText = isStay ? '推荐住宿' : '推荐必去';
-
-        // --- 修改开始 ---
-        container.innerHTML += `
-            <a href="detail.html?id=${item.id}" class="card">
-                <div class="card-left">
-                    <span class="img-fallback-text">${fallbackText}</span>
+                    if(!item) return;
+                    const isStay = item.type === '住宿';
                     
-                    <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
+                    // 价格处理
+                    let priceDisplay = '¥-';
+                    if (isStay && item.roomOffers && item.roomOffers.length) {
+                        const minP = Math.min(...item.roomOffers.map(r => r.priceCNY));
+                        priceDisplay = `¥${minP}起`;
+                    } else if (item.avgPricePerPersonCNY) {
+                        priceDisplay = `¥${item.avgPricePerPersonCNY}/人`;
+                    }
                     
-                    <span style="position:absolute; top:0; left:0; background:var(--primary-color); color:white; font-size:0.8rem; padding:3px 8px; border-bottom-right-radius:8px; z-index:10; box-shadow:1px 1px 3px rgba(0,0,0,0.3);">
-                        ${fallbackText}
-                    </span>
-                </div>
-                <div class="card-content">
-                    <h4 class="card-title">${item.name}</h4>
-                    <div class="card-info">★ ${item.rating} | ¥${price}起</div>
-                </div>
-            </a>`;
-        // --- 修改结束 ---
-    });
+                    // 图片处理
+                    let imgSrc = '';
+                    if (item.media && item.media.cover) imgSrc = item.media.cover;
+
+                    const badgeText = isStay ? '推荐住宿' : '推荐必去';
+                    const badgeColor = isStay ? '#2d3436' : 'var(--primary-color)';
+                    const typeTag = item.category || item.starOrLevel || '精选';
+
+                    container.innerHTML += `
+                        <a href="detail.html?id=${item.id}" class="card">
+                            <div class="card-left">
+                                <span class="recommend-badge" style="background:${badgeColor}">${badgeText}</span>
+                                暂无图片
+                                <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
+                            </div>
+                            <div class="card-content">
+                                <div>
+                                    <h4 class="card-title">${item.name}</h4>
+                                    <div class="card-info">★ ${item.rating} <span class="tag">${typeTag}</span></div>
+                                </div>
+                                <div class="price">${priceDisplay}</div>
+                            </div>
+                        </a>`;
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('hutong-name').innerText = "杨梅竹斜街";
             });
     </script>
 </body>

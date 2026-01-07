@@ -5,78 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>景点美食列表</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 全局样式统一，和首页/详情页同风格 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary-color: #d63031;
+            --secondary-color: #ff9f43;
+            --light-gray: #f5f5f5;
+            --mid-gray: #e0e0e0;
+            --dark-gray: #636e72;
+            --radius: 10px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: "Microsoft Yahei", sans-serif;
+            color: #333;
+            line-height: 1.7;
+            background-color: #f9f9f9;
+            padding-bottom: 70px;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 16px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        /* 搜索框美化 */
+        .search-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--mid-gray);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            background-color: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .search-box:focus {
+            border-color: var(--primary-color);
+        }
+        /* 列表卡片核心样式 */
+        #list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card {
+            display: flex;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        /* 左侧图片区 */
+        .card-left {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            flex-shrink: 0;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-gray);
+            font-size: 0.8rem;
+        }
+        .thumb-img {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* 右侧内容区 */
+        .card-content {
+            padding: 12px 15px;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-info {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        /* 分类标签样式 */
+        .tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+        /* 价格样式 */
+        .price {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1rem;
+            align-self: flex-start;
+            padding-left: 10px;
+        }
+    </style>
 </head>
 <body>
     <header><h1>景点美食</h1></header>
 
     <div class="container">
-        <input type="text" class="search-box" placeholder="搜索餐厅、景点..." id="search-input">
+        <input type="text" class="search-box" placeholder="搜索餐厅、景点、分类..." id="search-input">
         <div id="list-container"></div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
-        <a href="pois.html" class="nav-item active"><span class="nav-icon">🍜</span>景点美食</a>
-        <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
-        <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
-    </nav>
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+    <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
+    <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+    <a href="parks.html" class="nav-item"><span class="nav-icon">🅿️</span>停车场</a>
+    <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
+</nav>
 
     <script>
         let allPois = [];
         const container = document.getElementById('list-container');
 
-        // --- 渲染函数 ---
+        // --- 渲染列表函数 ---
         function render(list) {
             container.innerHTML = '';
             if(list.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:#999">暂无相关数据</div>';
+                container.innerHTML = '<div style="text-align:center;padding:30px 0;color:#999;font-size:0.95rem">🔍 暂无相关景点/美食</div>';
                 return;
             }
-
+            // 循环遍历全部数据，一个都不漏 ✅修复后：遍历不会中断
             list.forEach(item => {
                 const address = item.location ? item.location.address : '地址未知';
-                const price = item.avgPricePerPersonCNY ? `¥${item.avgPricePerPersonCNY}/人` : '¥-';
-                
-                // 修改：直接使用本地图片路径
-                // data.json 中的路径通常为 assets/img/...
+                // ✅✅✅【核心修复：价格判断逻辑】兼容 无此字段/值为0/有价格 三种情况
+                const priceText = !item.avgPricePerPersonCNY ? '免费' : `¥${item.avgPricePerPersonCNY}/人`;
                 let imgSrc = '';
                 if (item.media && item.media.cover) {
                     imgSrc = item.media.cover; 
                 }
+                const cate = item.category || item.type || '其他';
 
                 container.innerHTML += `
                     <a href="detail.html?id=${item.id}" class="card">
                         <div class="card-left">
+                            暂无图片
                             <img src="${imgSrc}" class="thumb-img" onerror="this.style.display='none'">
                         </div>
                         <div class="card-content">
                             <div>
                                 <h4 class="card-title">${item.name}</h4>
-                                <div class="card-info">★ ${item.rating} <span class="tag">${item.category}</span></div>
+                                <div class="card-info">★ ${item.rating || '暂无'} <span class="tag">${cate}</span></div>
                                 <div class="card-info">📍 ${address}</div>
                             </div>
-                            <div class="price">${price}</div>
+                            <div class="price">${priceText}</div>
                         </div>
                     </a>`;
             });
         }
 
-        // --- 加载数据 ---
+        // --- 加载data.json 读取【全部】pois数据 ---
         fetch('./data.json')
             .then(res => res.json())
             .then(data => {
-                allPois = data.pois || [];
-                render(allPois);
+                allPois = data.pois; // 直接赋值全部POI，无过滤！！！
+                console.log('✅加载到POI总数：', allPois.length); // 控制台会打印 10
+                render(allPois); // 渲染全部数据
             })
             .catch(err => {
                 console.error(err);
-                container.innerHTML = "<p style='text-align:center;margin-top:20px'>数据加载失败，请确保使用 http.server 运行</p>";
+                container.innerHTML = "<p style='text-align:center;margin-top:20px;color:#d63031'>⚠️ 数据加载失败，请检查data.json文件路径</p>";
             });
 
-        // 搜索功能
+        // 优化版搜索功能 - 模糊搜索 匹配名称/分类/关键词
         document.getElementById('search-input').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            const filtered = allPois.filter(i => i.name.includes(val) || i.category.includes(val));
+            const val = e.target.value.trim();
+            if(val === '') {
+                render(allPois); // 空搜索框 → 显示全部
+                return;
+            }
+            const filtered = allPois.filter(item => {
+                const nameMatch = item.name.includes(val);
+                const cateMatch = item.category && item.category.includes(val);
+                const keywordMatch = item.keywords && item.keywords.some(k => k.includes(val));
+                return nameMatch || cateMatch || keywordMatch;
+            });
             render(filtered);
         });
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>详情 - 杨梅竹斜街</title>
+    <title>详情 - 胡同导览</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
             ← 返回上一页
         </a>
         
-        <h2 id="d-name" style="margin-top:0;"></h2>
+        <h2 id="d-name" style="margin-top:0;">加载中...</h2>
         <div style="margin-bottom:15px;">
             <span class="tag" id="d-type"></span>
             <span style="color:#ff9f43; font-weight:bold; margin-left:10px;" id="d-rating"></span>
@@ -25,11 +25,66 @@
         </div>
         
         <p id="d-address" style="color:#666; border-bottom:1px solid #eee; padding-bottom:15px; margin-bottom:15px; display:flex; align-items:center;">
-            📍 <span style="margin-left:5px">加载中...</span>
+            📍 <span style="margin-left:5px">地址加载中...</span>
         </p>
         
-        <h4>💰 优惠信息</h4>
+        <h4>💰 优惠 / 详细信息</h4>
         <div id="d-offers" style="margin-bottom:20px;"></div>
+
+        <div id="poi-booking-section" style="display:none; background:#fff8e1; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ffecb3;">
+            <h4 style="margin-top:0; color:#f57f17; display:flex; align-items:center;">
+                📅 景点/美食预约 
+            </h4>
+            <div id="poi-booking-form" style="display:flex; flex-direction:column; gap:12px;">
+                <div>
+                    <label style="font-size:0.9rem; color:#f57f17; display:block; margin-bottom:4px;">🗓️ 预约时间：</label>
+                    <input type="datetime-local" id="poi-time-input" style="width:100%; padding:10px; border:1px solid #ffe082; border-radius:6px; box-sizing:border-box; font-family:inherit;">
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1">
+                        <label style="font-size:0.9rem; color:#f57f17; display:block; margin-bottom:4px;">👤 姓名：</label>
+                        <input type="text" id="user-name" placeholder="您的称呼" style="width:100%; padding:10px; border:1px solid #ffe082; border-radius:6px;">
+                    </div>
+                    <div style="flex:1">
+                        <label style="font-size:0.9rem; color:#f57f17; display:block; margin-bottom:4px;">👥 人数：</label>
+                        <input type="number" id="user-people" value="2" min="1" style="width:100%; padding:10px; border:1px solid #ffe082; border-radius:6px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:0.9rem; color:#f57f17; display:block; margin-bottom:4px;">📞 联系电话：</label>
+                    <input type="tel" id="user-phone" placeholder="接收短信通知" style="width:100%; padding:10px; border:1px solid #ffe082; border-radius:6px;">
+                </div>
+                <button onclick="handlePoiBooking()" id="poi-submit-btn" style="padding:12px 20px; background:#ff9f43; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 2px 5px rgba(255, 159, 67, 0.4); margin-top:5px;">
+                    提交预约信息
+                </button>
+            </div>
+        </div>
+
+        <div id="booking-section" style="display:none; background:#f0f9eb; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #c3e6cb;">
+            <h4 style="margin-top:0; color:#2e7d32; display:flex; align-items:center;">
+                🅿️ 在线预约车位 
+            </h4>
+            
+            <div id="booking-status" style="margin-bottom:15px; font-weight:bold; padding-bottom:10px; border-bottom:1px dashed #aadec2;">
+                正在同步车位数据...
+            </div>
+            
+            <div id="booking-form" style="display:flex; flex-direction:column; gap:12px;">
+                <div>
+                    <label style="font-size:0.9rem; color:#2e7d32; display:block; margin-bottom:4px;">📅 预计入场时间：</label>
+                    <input type="datetime-local" id="time-input" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-family:inherit;">
+                </div>
+                <div>
+                    <label style="font-size:0.9rem; color:#2e7d32; display:block; margin-bottom:4px;">🚗 车牌号码：</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="plate-input" placeholder="例：京A88888" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:6px;">
+                        <button onclick="handleParkBooking()" id="submit-btn" style="padding:10px 20px; background:#2e7d32; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 2px 5px rgba(46, 125, 50, 0.3);">
+                            提交预约
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <h4>📝 简介 / 设施</h4>
         <div id="d-desc" style="color:#555; font-size:0.9rem; line-height:1.6;"></div>
@@ -40,83 +95,162 @@
         <img class="modal-content" id="img01">
     </div>
 
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="pois.html" class="nav-item"><span class="nav-icon">🍜</span>景点美食</a>
+        <a href="stays.html" class="nav-item"><span class="nav-icon">🛏️</span>酒店住宿</a>
+        <a href="parks.html" class="nav-item"><span class="nav-icon">🅿️</span>停车场</a>
+        <a href="route.html" class="nav-item"><span class="nav-icon">🗺️</span>路线</a>
+    </nav>
+
     <script>
-        // 获取URL参数
+        let currentParkItem = null;
+        let serverBookings = []; 
         const params = new URLSearchParams(window.location.search);
         const targetId = params.get('id');
 
-        fetch('./data.json').then(res => res.json()).then(data => {
-            const allItems = [...(data.pois||[]), ...(data.stays||[])];
-            const item = allItems.find(i => i.id === targetId);
+        // 1. 加载数据
+        Promise.all([
+            fetch('./data.json').then(res => res.json()),
+            fetch('./park.json').then(res => res.json())
+        ]).then(([mainData, parkData]) => {
+            renderPage(mainData, parkData);
+            
+            // 2. 加载预约历史（失败不影响页面）
+            fetch('./bookings.json?t=' + Date.now())
+                .then(res => res.ok ? res.json() : [])
+                .then(data => {
+                    serverBookings = Array.isArray(data) ? data : [];
+                    updateBookingStatus();
+                })
+                .catch(() => { serverBookings = []; updateBookingStatus(); });
 
+        }).catch(err => {
+            console.error(err);
+            document.querySelector('.detail-body').innerHTML = "<div style='padding:20px;text-align:center;color:red'>数据加载失败，请检查 data.json</div>";
+        });
+
+        function renderPage(mainData, parkData) {
+            const parkList = Array.isArray(parkData) ? parkData : (parkData.pois || []);
+            const allItems = [...(mainData.pois || []), ...(mainData.stays || []), ...parkList];
+
+            const item = allItems.find(i => i.id === targetId);
             if(!item) {
-                document.body.innerHTML = "<div style='padding:20px;text-align:center'>⚠️ 未找到该项目信息</div>";
+                document.querySelector('.detail-body').innerHTML = "<div style='padding:20px;text-align:center'>⚠️ 未找到该项目信息</div>";
                 return;
             }
+            currentParkItem = item; 
 
-            // 1. 基础信息渲染 [cite: 194]
+            // 基础信息
             document.getElementById('d-name').innerText = item.name;
             document.getElementById('d-cover-text').innerText = item.name;
-            document.getElementById('d-type').innerText = item.category || item.starOrLevel || '其它';
-            document.getElementById('d-rating').innerText = item.rating ? `★ ${item.rating}` : '暂无评分';
-            
-            // 2. 图片处理与错误交互 [cite: 193, 195]
+            document.getElementById('d-type').innerText = item.category || item.type || '其它';
+            document.getElementById('d-rating').innerText = item.rating ? `★ ${item.rating}` : '';
             const imgEl = document.getElementById('d-img');
-            if (item.media && item.media.cover) {
-                imgEl.src = item.media.cover; 
-            } else {
-                // 如果没有图片字段，使用默认占位图
-                imgEl.src = 'https://via.placeholder.com/400x300?text=No+Image';
-                imgEl.onclick = null; // 禁用点击
-                imgEl.style.cursor = 'default';
-            }
+            imgEl.src = (item.media && item.media.cover) ? item.media.cover : 'https://via.placeholder.com/400x300?text=No+Image';
 
-            // 3. 价格与地址
-            let price = item.avgPricePerPersonCNY;
-            if(!price && item.roomOffers && item.roomOffers.length) price = item.roomOffers[0].priceCNY;
-            document.getElementById('d-price').innerText = price ? `¥${price}起` : '';
+            let priceDisplay = '';
+            if (item.avgPricePerPersonCNY) priceDisplay = `¥${item.avgPricePerPersonCNY}/人`;
+            else if (item.roomOffers && item.roomOffers.length) priceDisplay = `¥${item.roomOffers[0].priceCNY}起`;
+            else if (item.priceText) priceDisplay = item.priceText;
+            document.getElementById('d-price').innerText = priceDisplay;
             
             const address = item.location ? item.location.address : (item.address || '地址未知');
             document.getElementById('d-address').innerHTML = `📍 <span style="margin-left:5px">${address}</span>`;
 
-            // 4. 优惠列表渲染
+            // Offers
             const offersDiv = document.getElementById('d-offers');
             let html = '';
-            if(item.deals && item.deals.length) {
-                item.deals.forEach(d => {
-                    html += `<div class="deal-item">🏷️ ${d.title || d} <span class="price" style="float:right">${d.priceCNY ? '¥'+d.priceCNY : ''}</span></div>`;
-                });
-            } else if (item.roomOffers) {
-                item.roomOffers.forEach(r => {
-                    html += `<div class="deal-item">🛏️ <b>${r.roomName}</b> <br><span style="color:#999;font-size:0.8rem">${r.breakfast||''} ${r.cancelPolicy||''}</span> <span class="price" style="float:right">¥${r.priceCNY}</span></div>`;
-                });
-            } else {
-                html = "<div style='color:#999; padding:10px 0;'>暂无特定优惠</div>";
-            }
+            if(item.deals && item.deals.length) item.deals.forEach(d => html += `<div class="deal-item">🏷️ ${d.title || d}</div>`);
+            else if (item.roomOffers) item.roomOffers.forEach(r => html += `<div class="deal-item">🛏️ ${r.roomName} ¥${r.priceCNY}</div>`);
+            else if (item.parkingInfo) {
+                html += `<div class="deal-item">🚗 总车位：${item.parkingInfo.totalSpaces || '-'}</div>`;
+            } else html = "<div style='color:#999; padding:10px 0;'>暂无优惠</div>";
             offersDiv.innerHTML = html;
 
-            // 5. 描述渲染
-            const descDiv = document.getElementById('d-desc');
-            if(item.amenities) descDiv.innerHTML = "✅ <b>设施服务：</b> " + item.amenities.join(' · ');
-            else if (item.keywords) descDiv.innerHTML = "🏷️ <b>关键词：</b> " + item.keywords.join('、');
-            else descDiv.innerText = "暂无详细描述";
-        });
+            document.getElementById('d-desc').innerText = item.keywords ? item.keywords.join('、') : "暂无详细描述";
 
-        // 交互逻辑：模态框开关
-        function openModal() {
-            const src = document.getElementById('d-img').src;
-            // 防止点击占位图也放大
-            if(src.includes('placeholder.com')) return; 
+            // --- 核心修复：决定显示哪个预约框 ---
+            const parkSection = document.getElementById('booking-section'); // 绿色
+            const poiSection = document.getElementById('poi-booking-section'); // 黄色
             
-            const modal = document.getElementById('imgModal');
-            const modalImg = document.getElementById("img01");
-            modal.style.display = "block";
-            modalImg.src = src;
+            parkSection.style.display = 'none';
+            poiSection.style.display = 'none';
+            
+            // 宽松判断：只要是停车场，或者ID包含'park'，就显示绿色框
+            if (item.type === '停车场' || (item.id && item.id.includes('park'))) {
+                parkSection.style.display = 'block';
+                initTimeInput('time-input');     
+            } 
+            // 宽松判断：只要是餐饮、景点、住宿，或者ID包含'restaurant'/'scenic'，就显示黄色框
+            else if (['餐饮', '景点', '住宿'].includes(item.type) || item.id.includes('restaurant') || item.id.includes('scenic')) {
+                poiSection.style.display = 'block';
+                initTimeInput('poi-time-input');
+            }
         }
 
-        function closeModal() {
-            document.getElementById('imgModal').style.display = "none";
+        function initTimeInput(elementId) {
+            const now = new Date();
+            const tzOffset = now.getTimezoneOffset() * 60000; 
+            const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+            const el = document.getElementById(elementId);
+            if(el) { el.value = localISOTime; el.min = localISOTime; }
         }
+
+        function updateBookingStatus() {
+            if (!currentParkItem || !document.getElementById('booking-section').style.display === 'block') return;
+            
+            const total = parseInt(currentParkItem.parkingInfo?.totalSpaces) || 0;
+            const occupied = serverBookings.filter(b => b.parkId === currentParkItem.id).length;
+            const left = Math.max(0, total - occupied);
+
+            document.getElementById('booking-status').innerHTML = 
+                `<span style="color:${left>0?'#2e7d32':'#d63031'}">剩余车位：<b>${left}</b> / ${total}</span>`;
+            
+            const btn = document.getElementById('submit-btn');
+            if(left <= 0) { btn.disabled = true; btn.innerText = "已满员"; btn.style.background = "#ccc"; }
+            else { btn.disabled = false; btn.innerText = "提交预约"; btn.style.background = "#2e7d32"; }
+        }
+
+        // --- 停车场提交 ---
+        function handleParkBooking() {
+            const plate = document.getElementById('plate-input').value.trim();
+            const startTime = document.getElementById('time-input').value;
+            if (!plate || !startTime) { alert("请填写完整信息！"); return; }
+            submitData({ parkId: currentParkItem.id, plate, startTime }, 'submit-btn');
+        }
+
+        // --- 景点提交 ---
+        function handlePoiBooking() {
+            const dateStr = document.getElementById('poi-time-input').value;
+            const name = document.getElementById('user-name').value.trim();
+            const phone = document.getElementById('user-phone').value.trim();
+            const people = document.getElementById('user-people').value;
+            if (!dateStr || !name || !phone) { alert("请填写完整信息！"); return; }
+            submitData({ poiId: currentParkItem.id, poiName: currentParkItem.name, user: { name, phone }, people }, 'poi-submit-btn');
+        }
+
+        function submitData(payload, btnId) {
+            const btn = document.getElementById(btnId);
+            const oldText = btn.innerText;
+            btn.innerText = "处理中..."; btn.disabled = true;
+
+            fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) { alert("✅ " + data.message); location.reload(); }
+                else { alert("❌ " + data.message); }
+            })
+            .catch(err => alert("请求失败，请确认服务器已启动"))
+            .finally(() => { btn.innerText = oldText; btn.disabled = false; });
+        }
+
+        function openModal() { document.getElementById('imgModal').style.display = "block"; document.getElementById("img01").src = document.getElementById('d-img').src; }
+        function closeModal() { document.getElementById('imgModal').style.display = "none"; }
     </script>
 </body>
 </html>

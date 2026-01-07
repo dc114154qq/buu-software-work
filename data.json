@@ -317,7 +317,196 @@
         "展览",
         "文物"
       ]
+    },
+    {
+  "id": "poi-scenic-004",
+  "name": "北海公园",
+  "type": "景点",
+  "category": "4A景区",
+  "rating": 4.8,
+  "reviewCount": 210000,
+  "avgPricePerPersonCNY": 15,
+  "status": "正常开放",
+  "openHours": "06:30-21:00 (停止入场 20:00)",
+  "location": {
+    "city": "北京",
+    "district": "西城区",
+    "address": "文津街1号",
+    "lng": 116.400000,
+    "lat": 39.930000
+  },
+  "distanceToHutong": {
+    "distanceKm": 2.1,
+    "description": "距目标点2.1km"
+  },
+  "rankTags": [
+    "北京必打卡景点口碑榜 No.3",
+    "北京历史文化景点",
+    "皇城根下的皇家园林",
+    "最佳赏景打卡地",
+    "适合休闲散步",
+    "古风拍照胜地"
+  ],
+  "media": {
+    "cover": "assets/img/poi/poi-scenic-004/cover.jpg"
+  },
+  "keywords": [
+    "北海公园",
+    "皇家园林",
+    "白塔",
+    "4A景区",
+    "什刹海",
+    "琼岛春阴"
+  ]
+},
+{
+  "id": "poi-scenic-005",
+  "name": "陶然亭公园",
+  "type": "景点",
+  "category": "4A景区",
+  "rating": 4.6,
+  "reviewCount": 120000,
+  "avgPricePerPersonCNY": 2,
+  "status": "正常开放",
+  "openHours": "06:00-22:00 (停止入场 21:00)",
+  "location": {
+    "city": "北京",
+    "district": "西城区",
+    "address": "太平街19号",
+    "lng": 116.390000,
+    "lat": 38.880000
+  },
+  "distanceToHutong": {
+    "distanceKm": 3.2,
+    "description": "距目标点3.2km"
+  },
+  "transport": {
+    "nearestSubway": {
+      "line": "4号线",
+      "station": "陶然亭站",
+      "exit": "C东南口",
+      "walkMeters": 580
     }
+  },
+  "rankTags": [
+    "北京城市公园口碑榜 No.7",
+    "南城休闲好去处",
+    "春季赏海棠胜地",
+    "适合亲子游乐",
+    "历史文化名园"
+  ],
+  "deals": [],
+  "media": {
+    "cover": "assets/img/poi/poi-scenic-005/cover.jpg"
+  },
+  "keywords": [
+    "陶然亭公园",
+    "4A景区",
+    "海棠花",
+    "陶然亭",
+    "南城公园",
+    "休闲散步"
+  ]
+},
+{
+  "id": "poi-scenic-006",
+  "name": "国家大剧院",
+  "type": "景点",
+  "category": "文化场馆",
+  "rating": 4.8,
+  "reviewCount": 180000,
+  "avgPricePerPersonCNY": 30,
+  "status": "正常开放",
+  "openHours": "09:00-17:00 (停止入场 16:30，演出日延长至20:00)",
+  "location": {
+    "city": "北京",
+    "district": "西城区",
+    "address": "西长安街2号",
+    "lng": 116.400000,
+    "lat": 39.910000
+  },
+  "distanceToHutong": {
+    "distanceKm": 1.8,
+    "description": "距目标点1.8km"
+  },
+  "transport": {
+    "nearestSubway": {
+      "line": "1号线",
+      "station": "天安门西站",
+      "exit": "C西南口",
+      "walkMeters": 450
+    }
+  },
+  "rankTags": [
+    "北京文化地标口碑榜 No.2",
+    "建筑美学打卡地",
+    "国家级艺术殿堂",
+    "适合艺术爱好者",
+    "夜景拍摄胜地"
+  ],
+  "deals": [],
+  "media": {
+    "cover": "assets/img/poi/poi-scenic-006/cover.jpg"
+  },
+  "keywords": [
+    "国家大剧院",
+    "文化场馆",
+    "建筑美学",
+    "艺术演出",
+    "天安门西",
+    "夜景"
+  ]
+},
+{
+  "id": "poi-scenic-007",
+  "name": "前门大街",
+  "type": "景点",
+  "category": "商业街",
+  "rating": 4.7,
+  "reviewCount": 320000,
+  "avgPricePerPersonCNY": 0,
+  "status": "正常开放",
+  "openHours": "全天开放 (商户营业时间 10:00-22:00)",
+  "location": {
+    "city": "北京",
+    "district": "东城区",
+    "address": "大江胡同与小江胡同交叉路口东南侧",
+    "lng": 116.410000,
+    "lat": 39.900000
+  },
+  "distanceToHutong": {
+    "distanceKm": 0.3,
+    "description": "距目标点300m"
+  },
+  "transport": {
+    "nearestSubway": {
+      "line": "2号线",
+      "station": "前门地铁站",
+      "exit": "C西南口",
+      "walkMeters": 200
+    }
+  },
+  "rankTags": [
+    "北京必逛商业街口碑榜 No.1",
+    "老字号聚集地",
+    "京味文化体验地",
+    "网红打卡胜地",
+    "适合购物美食"
+  ],
+  "deals": [],
+  "media": {
+    "cover": "assets/img/poi/poi-scenic-007/cover.jpg"
+  },
+  "keywords": [
+    "前门大街",
+    "商业街",
+    "老字号",
+    "京味小吃",
+    "网红打卡",
+    "前门地铁站"
+  ]
+}
+
   ],
   "stays": [
     {
